@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
+import 'dart:io';
 
 Future<AssetEntity?> _pickFromCamera(BuildContext c) {
   return CameraPicker.pickFromCamera(
@@ -359,6 +360,28 @@ class PickMethod {
   }
 
   factory PickMethod.customizableTheme(int maxAssetsCount) {
+    Widget? getExtraWidget(BuildContext context,
+        AssetPathEntity? path,
+        int length,) {
+      Future<PermissionState> ps = PhotoManager.requestPermissionExtend();
+      if (Platform.isIOS) {
+        return FutureBuilder<PermissionState>(
+          future: ps,
+          builder: (BuildContext context, AsyncSnapshot<PermissionState> snapshot) =>
+          snapshot.data != null && snapshot.data == PermissionState.limited ? InkWell(
+            onTap: PhotoManager.presentLimited,
+            child: Container(
+              color: Colors.grey,
+              child: const Text(
+                "Select More Picture",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ) : const SizedBox.shrink(),
+        );
+      }
+      return null;
+    }
     return PickMethod(
       icon: '🎨',
       name: 'Customizable theme',
@@ -369,10 +392,14 @@ class PickMethod {
           pickerConfig: AssetPickerConfig(
             maxAssets: maxAssetsCount,
             selectedAssets: assets,
+            gridCount: 3,
+            pageSize: 120,
             pickerTheme: AssetPicker.themeData(
               Colors.lightBlueAccent,
               light: true,
             ),
+            specialItemPosition: SpecialItemPosition.append,
+            specialItemBuilder: getExtraWidget,
           ),
         );
       },

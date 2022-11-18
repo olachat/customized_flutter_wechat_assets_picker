@@ -1388,12 +1388,18 @@ class DefaultAssetPickerBuilderDelegate
     if (currentPathEntity?.isAll != true) {
       return length;
     }
+    bool isSpecialItemEmpty = specialItem != null;
     switch (specialItemPosition) {
       case SpecialItemPosition.none:
         return length;
       case SpecialItemPosition.prepend:
       case SpecialItemPosition.append:
+        if(isSpecialItemEmpty) {
+          return length;
+        }
         return length + 1;
+      default:
+        return length;
     }
   }
 
